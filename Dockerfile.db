@@ -1,0 +1,12 @@
+FROM postgres:16
+
+# Create initialization directory
+RUN mkdir -p /docker-entrypoint-initdb.d
+
+# Copy the SQL script to initialization directory
+COPY /src/create_db.sql /docker-entrypoint-initdb.d/
+
+# Set permissions
+RUN chmod +r /docker-entrypoint-initdb.d/create_db.sql
+
+EXPOSE 5432
