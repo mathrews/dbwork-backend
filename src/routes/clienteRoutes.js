@@ -14,7 +14,9 @@ const router = express.Router();
 
 // Rotas CRUD básicas
 router.post('/clientes', criarCliente);          // CREATE
-router.get('/clientes', listarClientes);         // READ (todos)
+router.get('/clientes', (req, res) => { // READ (todos ou só ativos)
+	return listarClientes(req, res, req.query.ativos == 1);
+})
 router.get('/clientes/:id', buscarClientePorId); // READ (por ID)
 router.put('/clientes/:id', atualizarCliente);   // UPDATE
 router.delete('/clientes/:id', excluirCliente);  // DELETE

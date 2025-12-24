@@ -57,8 +57,8 @@ export const criarCliente = async (req, res) => {
   }
 };
 
-// READ - Listar todos os clientes
-export const listarClientes = async (req, res) => {
+// Listar todos ou apenas os clientes ativos
+export const listarClientes = async (req, res, apenasAtivos) => {
   try {
     const { ativo, cidade, estado, page = 1, limit = 10 } = req.query;
 
@@ -72,7 +72,7 @@ export const listarClientes = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const { count, rows } = await Cliente.findAndCountAll({
-      where,
+	  where: (apenasAtivos) ? { ativo: true } : { },
       order: [['nome', 'ASC']],
       limit: parseInt(limit),
       offset: parseInt(offset)

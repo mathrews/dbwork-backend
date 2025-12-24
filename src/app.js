@@ -37,6 +37,7 @@ app.get('/', (req, res) => {
       clientes: {
         POST: '/api/clientes - Criar novo cliente',
         GET: '/api/clientes - Listar todos os clientes',
+		'GET ?ativos=1': '/api/clientes?ativos=1 - Listar clientes ativos',
         'GET :id': '/api/clientes/:id - Buscar cliente por ID',
         PUT: '/api/clientes/:id - Atualizar cliente',
         DELETE: '/api/clientes/:id - Excluir cliente (soft delete)',
