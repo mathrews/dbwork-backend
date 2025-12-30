@@ -64,7 +64,7 @@ export const criarCliente = async (req, res) => {
 };
 
 // Listar clientes (com filtros)
-export const listarClientes = async (req, res, apenasAtivos) => {
+export const listarClientes = async (req, res) => {
   try {
     const { ativo, cidade, estado, page = 1, limit = 10 } = req.query;
 
