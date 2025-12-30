@@ -1,8 +1,7 @@
-// src/models/Cliente.js
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const Cliente = sequelize.define('Cliente', {
+export const Cliente = sequelize.define('Cliente', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -40,16 +39,6 @@ const Cliente = sequelize.define('Cliente', {
     },
     field: 'email'
   },
-  telefone: {
-    type: DataTypes.STRING(20),
-    validate: {
-      len: {
-        args: [10, 20],
-        msg: 'Telefone deve ter entre 10 e 20 caracteres'
-      }
-    },
-    field: 'telefone'
-  },
   data_cadastro: {
     type: DataTypes.DATEONLY,
     defaultValue: DataTypes.NOW,
@@ -79,5 +68,32 @@ const Cliente = sequelize.define('Cliente', {
   timestamps: false, // Não usar created_at e updated_at
   underscored: false // Manter nome das colunas como estão
 });
+
+export const ClienteTelefone = sequelize.define('ClienteTelefone', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+    field: 'id'
+  },
+  telefone: {
+    type: DataTypes.STRING(20),
+    validate: {
+      len: {
+        args: [10, 20],
+        msg: 'Cada telefone deve ter entre 10 e 20 caracteres, e os telefones devem ser separados por vírgulas.'
+      }
+    },
+    field: 'telefone'
+  }
+}, {
+  tableName: 'cliente_telefone',
+  timestamps: false, // Não usar created_at e updated_at
+  underscored: false // Manter nome das colunas como estão
+});
+
+Cliente.hasMany(ClienteTelefone);
+
+ClienteTelefone.belongsTo(Cliente);
 
 export default Cliente;

@@ -1,12 +1,10 @@
-// src/controllers/clienteController.js
-import Cliente from '../models/Cliente.js';
+import { Cliente, ClienteTelefone } from '../models/Cliente.js';
 
 // CREATE - Criar novo cliente
 export const criarCliente = async (req, res) => {
   try {
-    const { nome, email, telefone, cidade, estado, ativo = true } = req.body;
+    const { nome, email, telefones, cidade, estado, ativo = true } = req.body;
 
-    // Validação básica
     if (!nome || !email) {
       return res.status(400).json({
         success: false,
@@ -17,12 +15,20 @@ export const criarCliente = async (req, res) => {
     const novoCliente = await Cliente.create({
       nome,
       email,
-      telefone,
       cidade,
       estado,
       ativo,
-      data_cadastro: new Date() // Opcional, pois tem DEFAULT
+      data_cadastro: new Date() // Opcional
     });
+
+    const listaTelefone = telefones.split(",");
+
+    for (let telefone of listaTelefone) {
+      await ClienteTelefone.create({
+        telefone,
+        ClienteId: novoCliente.id,
+      })
+    }
 
     return res.status(201).json({
       success: true,
@@ -57,7 +63,7 @@ export const criarCliente = async (req, res) => {
   }
 };
 
-// Listar todos ou apenas os clientes ativos
+// Listar clientes (com filtros)
 export const listarClientes = async (req, res, apenasAtivos) => {
   try {
     const { ativo, cidade, estado, page = 1, limit = 10 } = req.query;
@@ -72,11 +78,26 @@ export const listarClientes = async (req, res, apenasAtivos) => {
     const offset = (page - 1) * limit;
 
     const { count, rows } = await Cliente.findAndCountAll({
-	  where: (apenasAtivos) ? { ativo: true } : { },
+	  where: where,
       order: [['nome', 'ASC']],
       limit: parseInt(limit),
       offset: parseInt(offset)
     });
+
+    console.log(rows);
+
+    // horripilante
+    for (let cliente of rows) {
+      let dv = cliente.dataValues;
+      let ClienteId = dv.id;
+      let telefones = (await ClienteTelefone.findAll({
+        where: {
+          ClienteId
+        }
+      })).map(t => t.dataValues.telefone)
+
+      dv.telefones = telefones;
+    }
 
     return res.status(200).json({
       success: true,
@@ -138,6 +159,26 @@ export const atualizarCliente = async (req, res) => {
         success: false,
         message: 'Cliente não encontrado'
       });
+    }
+
+    if (dadosAtualizados.telefones !== undefined) {
+      const telefones = dadosAtualizados.telefones.split(',');
+      const ClienteId = cliente.id;
+
+      await ClienteTelefone.destroy({
+        where: {
+          ClienteId
+        }
+      });
+
+      for (let telefone of telefones) {
+        await ClienteTelefone.create({
+          telefone,
+          ClienteId
+        })
+      }
+
+      delete dadosAtualizados.telefones;
     }
 
     // Atualizar
