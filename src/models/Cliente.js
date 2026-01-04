@@ -22,6 +22,25 @@ export const Cliente = sequelize.define('Cliente', {
     },
     field: 'nome'
   },
+  idade: {
+    type: DataTypes.INTEGER,
+    validate: {
+      min: 0,
+    },
+    field: 'idade',
+  },
+  cpf: {
+    type: DataTypes.CHAR(11),
+    allowNull: false,
+    unique: {
+      name: 'clientes_cpf_key',
+      msg: 'Este CPF já está cadastrado'
+    },
+    validate: {
+      len: [11, 11],
+    },
+    field: 'cpf',
+  },
   email: {
     type: DataTypes.STRING(100),
     allowNull: false,
@@ -39,15 +58,9 @@ export const Cliente = sequelize.define('Cliente', {
     },
     field: 'email'
   },
-  data_cadastro: {
-    type: DataTypes.DATEONLY,
-    defaultValue: DataTypes.NOW,
-    field: 'data_cadastro'
-  },
-  ativo: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
-    field: 'ativo'
+  endereco: {
+    type: DataTypes.TEXT,
+    field: 'endereco'
   },
   cidade: {
     type: DataTypes.STRING(50),
@@ -62,11 +75,20 @@ export const Cliente = sequelize.define('Cliente', {
       }
     },
     field: 'estado'
-  }
+  },
+  data_nascimento: {
+    type: DataTypes.DATEONLY,
+    field: 'data_nascimento'
+  },
+  ativo: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    field: 'ativo'
+  },
 }, {
   tableName: 'clientes',
-  timestamps: false, // Não usar created_at e updated_at
-  underscored: false // Manter nome das colunas como estão
+  timestamps: false,
+  underscored: false
 });
 
 export const ClienteTelefone = sequelize.define('ClienteTelefone', {
@@ -85,11 +107,15 @@ export const ClienteTelefone = sequelize.define('ClienteTelefone', {
       }
     },
     field: 'telefone'
-  }
+  },
+  tipo: { // whatsapp, celular, fixo...
+    type: DataTypes.STRING(100),
+    field: 'tipo',
+  },
 }, {
   tableName: 'cliente_telefone',
-  timestamps: false, // Não usar created_at e updated_at
-  underscored: false // Manter nome das colunas como estão
+  timestamps: false,
+  underscored: false
 });
 
 Cliente.hasMany(ClienteTelefone);
