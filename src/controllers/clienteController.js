@@ -34,16 +34,13 @@ export const criarCliente = async (req, res) => {
       cidade,
       estado,
       data_nascimento,
-      telefones, // vem no formato [tel: string, tipo: string]
       ativo});
 
-    for (let telefone of telefones) {
-      await ClienteTelefone.create({
-        telefone: telefone[0],
-        tipo: telefone[1],
-        ClienteId: novoCliente.id,
-      })
-    }
+    await ClienteTelefone.create({
+      telefone: telefones[0],
+      tipo: "",
+      ClienteId: novoCliente.id,
+    })
 
     return res.status(201).json({
       success: true,
