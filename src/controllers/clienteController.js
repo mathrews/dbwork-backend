@@ -1,31 +1,69 @@
+/* TODO: atualizar as requisições envolvendo clientes para o novo modelo com
+ * mais colunas */
+
 import { Cliente, ClienteTelefone } from '../models/Cliente.js';
+
+function RequestValidationError(msg) {
+  this.name = "RequestValidationError";
+
+  switch (msg) {
+    case "telmsg":
+      this.message = "Os tipos dos telefones devem ser fornecidos respectivamente, e não devem ultrapassar em número os próprios telefones.";
+      break;
+    default:
+      this.message = msg;
+      break;
+  }
+}
 
 // CREATE - Criar novo cliente
 export const criarCliente = async (req, res) => {
   try {
-    const { nome, email, telefones, cidade, estado, ativo = true } = req.body;
+    const {
+        nome,
+        idade,
+        cpf,
+        email,
+        endereco,
+        cidade,
+        estado,
+        data_nascimento,
+        telefones,
+        tipos,
+        ativo = true } = req.body;
 
-    if (!nome || !email) {
+    if (!nome || !cpf || !email) {
       return res.status(400).json({
         success: false,
-        message: 'Nome e email são obrigatórios'
+        message: 'Nome, CPF e email são obrigatórios'
       });
     }
 
     const novoCliente = await Cliente.create({
       nome,
+      idade,
+      cpf,
       email,
+      endereco,
       cidade,
       estado,
-      ativo,
-      data_cadastro: new Date() // Opcional
-    });
+      data_nascimento,
+      telefones,
+      tipos,
+      ativo});
 
-    const listaTelefone = telefones.split(",");
+    const listaTelefone = telefones.split(',');
+    const listaTipos = tipos.split(',');
 
+    if (listaTipos.length > listaTelefone.length) {
+      throw RequestValidationError("telmsg");
+    }
+
+    let idx = 0;
     for (let telefone of listaTelefone) {
       await ClienteTelefone.create({
         telefone,
+        tipo: listaTipos[idx++],
         ClienteId: novoCliente.id,
       })
     }
@@ -52,6 +90,14 @@ export const criarCliente = async (req, res) => {
         success: false,
         message: 'Erro de validação',
         errors: mensagens
+      });
+    }
+
+    if (error.name === 'RequestValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+        errors: error.message
       });
     }
 
@@ -94,7 +140,7 @@ export const listarClientes = async (req, res) => {
         where: {
           ClienteId
         }
-      })).map(t => t.dataValues.telefone)
+      })).map(t => [t.dataValues.telefone, t.dataValues.tipo])
 
       dv.telefones = telefones;
     }
@@ -176,21 +222,30 @@ export const atualizarCliente = async (req, res) => {
       const ClienteId = cliente.id;
 
       // Remove telefones antigos
+      if (dadosAtualizados.tipos !== undefined) {
+        var tipos = dadosAtualizados.tipos.split(",");
+
+        if (tipos.length > telefones.length) {
+          throw RequestValidationError("telmsg");
+        }
+      }
+
       await ClienteTelefone.destroy({
         where: { ClienteId }
       });
 
       // Cria novos telefones
+      let idx = 0
       for (let telefone of telefones) {
-        if (telefone) {
-          await ClienteTelefone.create({
-            telefone,
-            ClienteId
-          });
-        }
+        await ClienteTelefone.create({
+          telefone,
+          tipo: tipos[idx++],
+          ClienteId
+        })
       }
 
       delete dadosAtualizados.telefones;
+      delete dadosAtualizados.tipos;
     }
 
     // Atualizar
@@ -220,6 +275,14 @@ export const atualizarCliente = async (req, res) => {
         success: false,
         message: 'Erro de validação',
         errors: mensagens
+      });
+    }
+
+    if (error.name === 'RequestValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+        errors: error.message
       });
     }
 
