@@ -52,6 +52,8 @@ export const criarCliente = async (req, res) => {
       tipos,
       ativo});
 
+	  // ADICIONAR CLIENTES DÁ ERRO AQUI
+	  // esse negócio de telefone e tipo é uma dor de cabeça, viu...
     const listaTelefone = telefones.split(',');
     const listaTipos = tipos.split(',');
 
