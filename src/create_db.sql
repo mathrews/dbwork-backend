@@ -1,8 +1,3 @@
-CREATE DATABASE empresa_db;
-
--- Conectar ao banco
-\c empresa_db
-
 -- Criar tabela clientes
 CREATE TABLE clientes (
      id SERIAL PRIMARY KEY,
@@ -14,11 +9,12 @@ CREATE TABLE clientes (
      estado VARCHAR(2)
 );
 
+-- Criar tabela cliente_telefone
 CREATE TABLE cliente_telefone (
      id SERIAL PRIMARY KEY,
      telefone VARCHAR(20),
      id_cliente INTEGER NOT NULL,
-     FOREIGN KEY (id_cliente) REFERENCES clientes(id) ON DELETE CASCADE;
+     FOREIGN KEY (id_cliente) REFERENCES clientes(id) ON DELETE CASCADE
 );
 
 -- Criar índice para melhor performance

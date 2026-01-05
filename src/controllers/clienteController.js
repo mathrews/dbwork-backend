@@ -208,9 +208,20 @@ export const atualizarCliente = async (req, res) => {
     }
 
     if (dadosAtualizados.telefones !== undefined) {
-      const telefones = dadosAtualizados.telefones.split(',');
+      let telefones = [];
+
+      // Se for array, usa direto
+      if (Array.isArray(dadosAtualizados.telefones)) {
+        telefones = dadosAtualizados.telefones;
+      }
+      // Se for string, transforma em array
+      else if (typeof dadosAtualizados.telefones === 'string') {
+        telefones = dadosAtualizados.telefones.split(',').map(t => t.trim());
+      }
+
       const ClienteId = cliente.id;
 
+      // Remove telefones antigos
       if (dadosAtualizados.tipos !== undefined) {
         var tipos = dadosAtualizados.tipos.split(",");
 
@@ -220,11 +231,10 @@ export const atualizarCliente = async (req, res) => {
       }
 
       await ClienteTelefone.destroy({
-        where: {
-          ClienteId
-        }
+        where: { ClienteId }
       });
 
+      // Cria novos telefones
       let idx = 0
       for (let telefone of telefones) {
         await ClienteTelefone.create({
