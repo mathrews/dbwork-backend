@@ -36,11 +36,13 @@ export const criarCliente = async (req, res) => {
       data_nascimento,
       ativo});
 
-    await ClienteTelefone.create({
-      telefone: telefones[0],
-      tipo: "",
-      ClienteId: novoCliente.id,
-    })
+    for (let tel of telefones) {
+      await ClienteTelefone.create({
+        telefone: tel.telefone,
+        tipo: tel.tipo,
+        ClienteId: novoCliente.id,
+      })
+    }
 
     return res.status(201).json({
       success: true,
@@ -182,10 +184,10 @@ export const atualizarCliente = async (req, res) => {
       });
 
       // Cria novos telefones
-      for (let telefone of telefones) {
+      for (let tel of telefones) {
         await ClienteTelefone.create({
-          telefone: telefone[0],
-          tipo: telefone[1],
+          telefone: tel.telefone,
+          tipo: tel.tipo,
           ClienteId
         })
       }
