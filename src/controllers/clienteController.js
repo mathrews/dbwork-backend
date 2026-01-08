@@ -108,7 +108,7 @@ export const listarClientes = async (req, res) => {
         where: {
           ClienteId
         }
-      })).map(t => [t.dataValues.telefone, t.dataValues.tipo])
+      })).map(t => ({telefone: t.dataValues.telefone, tipo: t.dataValues.tipo}))
 
       dv.telefones = telefones;
     }
