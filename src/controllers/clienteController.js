@@ -8,7 +8,6 @@ export const criarCliente = async (req, res) => {
   try {
     const {
         nome,
-        idade,
         cpf,
         email,
         endereco,
@@ -18,16 +17,15 @@ export const criarCliente = async (req, res) => {
         telefones,
         ativo = true } = req.body;
 
-    if (!nome || !cpf || !email) {
+    if (!nome || !cpf || !email || !data_nascimento) {
       return res.status(400).json({
         success: false,
-        message: 'Nome, CPF e email são obrigatórios'
+        message: 'Nome, CPF, email e data de nascimento são obrigatórios'
       });
     }
 
     const novoCliente = await Cliente.create({
       nome,
-      idade,
       cpf,
       email,
       endereco,
@@ -98,12 +96,14 @@ export const listarClientes = async (req, res) => {
       offset: parseInt(offset)
     });
 
-    console.log(rows);
-
     // horripilante
     for (let cliente of rows) {
       let dv = cliente.dataValues;
       let ClienteId = dv.id;
+      let data_nascimento = new Date(dv.data_nascimento)
+      // essa atrocidade veio direto do stackoverflow
+      // https://stackoverflow.com/a/15555947
+      let idade = ~~((Date.now() - data_nascimento) / (31557600000));
       let telefones = (await ClienteTelefone.findAll({
         where: {
           ClienteId
@@ -111,6 +111,7 @@ export const listarClientes = async (req, res) => {
       })).map(t => ({telefone: t.dataValues.telefone, tipo: t.dataValues.tipo}))
 
       dv.telefones = telefones;
+      dv.idade = idade;
     }
 
     return res.status(200).json({

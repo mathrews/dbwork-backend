@@ -22,13 +22,6 @@ export const Cliente = sequelize.define('Cliente', {
     },
     field: 'nome'
   },
-  idade: {
-    type: DataTypes.INTEGER,
-    validate: {
-      min: 0,
-    },
-    field: 'idade',
-  },
   cpf: {
     type: DataTypes.CHAR(11),
     allowNull: false,
@@ -78,6 +71,7 @@ export const Cliente = sequelize.define('Cliente', {
   },
   data_nascimento: {
     type: DataTypes.DATEONLY,
+    allowNull: false,
     field: 'data_nascimento'
   },
   ativo: {
