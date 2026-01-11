@@ -265,20 +265,18 @@ export const excluirCliente = async (req, res) => {
       });
     }
 
-    // Soft delete: marcar como inativo
-    await cliente.update({ ativo: false });
+    // Remove telefones associados ao cliente
+    await ClienteTelefone.destroy({
+      where: { ClienteId: id }
+    });
+
+    // Remove o cliente do banco
+    await cliente.destroy();
 
     return res.status(200).json({
       success: true,
-      message: 'Cliente marcado como inativo'
+      message: 'Cliente excluído permanentemente'
     });
-
-    // Para exclusão física (remover do banco):
-    // await cliente.destroy();
-    // return res.status(200).json({
-    //   success: true,
-    //   message: 'Cliente excluído permanentemente'
-    // });
 
   } catch (error) {
     console.error('Erro ao excluir cliente:', error);
