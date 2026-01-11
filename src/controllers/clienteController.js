@@ -30,16 +30,18 @@ export const criarCliente = async (req, res) => {
       email,
       endereco,
       cidade,
-      estado,
+      estado: (estado != '') ? estado : undefined,
       data_nascimento,
       ativo});
 
     for (let tel of telefones) {
-      await ClienteTelefone.create({
-        telefone: tel.telefone,
-        tipo: tel.tipo,
-        ClienteId: novoCliente.id,
-      })
+      if (tel.telefone != '') {
+        await ClienteTelefone.create({
+          telefone: tel.telefone,
+          tipo: tel.tipo,
+          ClienteId: novoCliente.id,
+        })
+      }
     }
 
     return res.status(201).json({
@@ -54,7 +56,7 @@ export const criarCliente = async (req, res) => {
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({
         success: false,
-        message: 'Este email já está cadastrado'
+        message: 'O e-mail ou CPF já está cadastrado.'
       });
     }
 
@@ -176,6 +178,16 @@ export const atualizarCliente = async (req, res) => {
       });
     }
 
+    if (dadosAtualizados.nome == undefined
+      || dadosAtualizados.cpf == undefined
+      || dadosAtualizados.email == undefined
+      || dadosAtualizados.data_nascimento == undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nome, CPF, email e data de nascimento são obrigatórios'
+      });
+    }
+
     if (dadosAtualizados.telefones !== undefined) { // [tel: str, tipo: str]
       const telefones = dadosAtualizados.telefones;
       const ClienteId = cliente.id;
@@ -186,14 +198,20 @@ export const atualizarCliente = async (req, res) => {
 
       // Cria novos telefones
       for (let tel of telefones) {
-        await ClienteTelefone.create({
-          telefone: tel.telefone,
-          tipo: tel.tipo,
-          ClienteId
-        })
+        if (tel.telefone != '') {
+          await ClienteTelefone.create({
+            telefone: tel.telefone,
+            tipo: tel.tipo,
+            ClienteId
+          })
+        }
       }
 
       delete dadosAtualizados.telefones;
+    }
+
+    if (dadosAtualizados.estado == '') {
+      dadosAtualizados.estado = undefined;
     }
 
     // Atualizar
